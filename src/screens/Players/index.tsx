@@ -16,12 +16,14 @@ import { playersGetByGroupAnTeam } from '@storage/player/playersGetByGroupAndTea
 import { PlayerStorageDTO } from '@storage/player/PlayerStorageDTO';
 import { playerRemoveByGroup } from '@storage/player/playerRemoveByGroup';
 import { groupRemoveByName } from '@storage/group/groupRemoveByName';
+import { Loading } from '@components/Loading';
 
 type RouteParams = {
   group: string;
 }
 
 export function Players() {
+  const [isLoading, setIsLoading] = useState(true);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [team, setTeam] = useState('Time A');
   const [players, setPlayers] = useState<PlayerStorageDTO[]>([]);
@@ -64,11 +66,16 @@ export function Players() {
 
   async function fetchPlayerByTeam(){
     try {
+      setIsLoading(true);
+
       const playersByTeam = await playersGetByGroupAnTeam(group, team);
       setPlayers(playersByTeam);
+
     } catch(error){
       console.log(error);
       Alert.alert('Pessoas', 'Não foi possível carregar as pessoas filtradas pelo time.')
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -89,14 +96,14 @@ export function Players() {
       navitation.navigate('groups');
     } catch(error){
       console.log(error)
-      Alert.alert('Erro', 'Não foi possível remver o grupo.')
+      Alert.alert('Erro', 'Não foi possível remover a turma.')
     }
   }
 
   async function handleGroupRemove(){
     Alert.alert(
       'Remover',
-      'Tem certeza que deseja remover o grupo?',
+      'Tem certeza que deseja remover a turma?',
       [
         { text: 'Não', style: 'cancel'},
         { text: 'Sim', onPress: () => groupRemove()}
@@ -145,6 +152,8 @@ export function Players() {
         />
         <NumberOfPlayers>{players.length}</NumberOfPlayers>
       </HeaderList>
+      {
+        isLoading ? <Loading/> :
 
       <FlatList
         data={players}
@@ -167,7 +176,7 @@ export function Players() {
         )}
         showsVerticalScrollIndicator={false}
       />
-
+      }
       <Button
         title='Remover turma'
         type='SECONDARY'

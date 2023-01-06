@@ -9,8 +9,10 @@ import { FlatList } from 'react-native';
 import { ListEmpty } from '@components/ListEmpty';
 import { Button } from '@components/Button';
 import { groupsGetAll } from '@storage/group/groupsGetAll';
+import { Loading } from '@components/Loading';
 
 export function Groups() {
+  const [isLoading, setIsLoading] = useState(true);
   const [groups, setGroups] = useState<string[]>([]);
 
   const navigation = useNavigation();
@@ -21,11 +23,14 @@ export function Groups() {
 
   async function fetchGroups(){
     try {
+      setIsLoading(true)
       const data = await groupsGetAll();
-
       setGroups(data);
+
     } catch (error) {
       console.log(error);
+    } finally{
+      setIsLoading(false);
     }
   }
 
@@ -42,6 +47,10 @@ export function Groups() {
       <Header />
 
       <Highlight title='Turmas' subtitle='jogue com a sua turma'/>
+
+      {
+        isLoading ? <Loading/> :
+
       <FlatList
         data={groups}
         keyExtractor={item => item}
@@ -59,7 +68,7 @@ export function Groups() {
           />
         )}
       />
-
+      }
       <Button
         title='Criar nova turma'
         onPress={handleNewGroup}
